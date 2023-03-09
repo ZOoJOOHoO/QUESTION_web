@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>题库管理</title>
+</head>
+<body>
+<div id="question">
+  <el-page-header @back="goBack" content="题库管理">
+  </el-page-header>
+  <br>
+  <el-row>
+    <el-button type="primary" @click="dialogVisible = true">添加选择题</el-button>
+    <el-button type="primary" @click="dialogVisible_PD = true">添加判断题</el-button>
+  </el-row>
+  <br>
+  <el-dialog
+          title="添加题目"
+          :visible.sync="dialogVisible"
+          width="30%">
+    <el-form ref="form" :model="form" label-width="80px">
+      <el-form-item label="录入章节">
+        <el-input v-model="form.chapter_number" placeholder="请输入录入章节编号"></el-input>
+      </el-form-item>
+      <el-form-item label="题目内容">
+        <el-input type="textarea" v-model="form.question_title"></el-input>
+      </el-form-item>
+      <el-form-item label="A">
+        <el-input type="textarea" v-model="form.option_a"></el-input>
+      </el-form-item>
+      <el-form-item label="B">
+        <el-input type="textarea" v-model="form.option_b"></el-input>
+      </el-form-item>
+      <el-form-item label="C">
+        <el-input type="textarea" v-model="form.option_c"></el-input>
+      </el-form-item>
+      <el-form-item label="D">
+        <el-input type="textarea" v-model="form.option_d"></el-input>
+      </el-form-item>
+      <el-form-item label="正确答案">
+        <el-radio-group v-model="form.question_answer">
+          <el-radio label="A"></el-radio>
+          <el-radio label="B"></el-radio>
+          <el-radio label="C"></el-radio>
+          <el-radio label="D"></el-radio>
+        </el-radio-group>
+      </el-form-item>
+      <el-form-item label="题目解释">
+        <el-input type="textarea" v-model="form.question_explain"></el-input>
+      </el-form-item>
+
+      <el-form-item>
+        <el-button type="primary" @click="onSubmit">立即创建</el-button>
+        <el-button @click="dialogVisible=false">取消</el-button>
+      </el-form-item>
+    </el-form>
+  </el-dialog>
+
+  <el-dialog
+          title="添加题目"
+          :visible.sync="dialogVisible_PD"
+          width="30%">
+    <el-form ref="form" :model="form_PD" label-width="80px">
+      <el-form-item label="录入章节">
+        <el-input v-model="form_PD.chapter_number" placeholder="请输入录入章节编号"></el-input>
+      </el-form-item>
+      <el-form-item label="题目内容">
+        <el-input type="textarea" v-model="form_PD.question_title"></el-input>
+      </el-form-item>
+      <el-form-item label="正确答案">
+        <el-radio-group v-model="form_PD.question_answer">
+          <el-radio label="对"></el-radio>
+          <el-radio label="错"></el-radio>
+        </el-radio-group>
+      </el-form-item>
+      <el-form-item label="题目解释">
+        <el-input type="textarea" v-model="form_PD.question_explain"></el-input>
+      </el-form-item>
+
+      <el-form-item>
+        <el-button type="primary" @click="onSubmit_PD">立即创建</el-button>
+        <el-button @click="dialogVisible_PD=false">取消</el-button>
+      </el-form-item>
+    </el-form>
+  </el-dialog>
+
+  <el-dialog
+          title="如有需要,可附着图片"
+          :visible.sync="dialogVisible_addimg"
+          width="30%">
+    <form action="http://localhost/question/oss" method="post" enctype="multipart/form-data">
+      <input type="file" name="fig">
+      <input type="submit" value="提交">
+    </form>
+  </el-dialog>
+
+  <template>
+    <el-table
+            :data="tableData"
+            border
+            style="width: 100%">
+      <el-table-column
+              prop="question_number"
+              label="题目编号"
+              width="80">
+      </el-table-column>
+      <el-table-column
+              prop="chapter_number"
+              label="所属章节"
+              width="50">
+      </el-table-column>
+      <el-table-column
+              prop="question_type"
+              label="题目类型"
+              width="50">
+      </el-table-column>
+      <el-table-column
+              prop="question_title"
+              label="题目">
+      </el-table-column>
+      <el-table-column
+              prop="option_a"
+              label="选项A/对">
+      </el-table-column>
+      <el-table-column
+              prop="option_b"
+              label="选项B/错">
+      </el-table-column>
+      <el-table-column
+              prop="option_c"
+              label="选项C">
+      </el-table-column>
+      <el-table-column
+              prop="option_d"
+              label="选项D">
+      </el-table-column>
+      <el-table-column
+              prop="question_answer"
+              label="正确答案"
+              width="50">
+      </el-table-column>
+      <el-table-column
+              prop="question_explain"
+              label="解释">
+      </el-table-column>
+      <el-table-column
+              prop="submit_number"
+              label="提交数目"
+              width="50">
+      </el-table-column>
+      <el-table-column
+              prop="wrong_number"
+              label="错误数目"
+              width="50">
+      </el-table-column>
+      <el-table-column
+              prop="accuracy"
+              label="正确率"
+              width="70">
+      </el-table-column>
+      <el-table-column
+              prop="img_url"
+              label="图片地址"
+              width="70">
+      </el-table-column>
+      <el-table-column
+              align="center"
+              label="操作">
+        <template slot-scope="scope">
+          <el-row>
+<!--            <el-button type="danger" @click="delete_ques(scope.row)" >删除</el-button>-->
+            <el-button type="success" @click="add_img(scope.row)">附图</el-button>
+            <el-button type="danger" @click="delete_ques(scope.row)" icon="el-icon-delete" circle></el-button>
+          </el-row>
+        </template>
+      </el-table-column>
+    </el-table>
+  </template>
+</div>
+<script src="js/axios-0.18.0.js"></script>
+<script src="js/vue.js"></script>
+<script src="element-ui/lib/index.js"></script>
+<link rel="stylesheet" href="element-ui/lib/theme-chalk/index.css">
+<script>
+  new Vue({
+    el:"#question",
+    mounted(){
+      this.SELECTALL();
+    },
+    methods: {
+      goBack() {
+        location.href = "http://localhost/ELEMENT_HOME.html"
+      },
+      handleSelectionChange(val) {
+        this.multipleSelection = val;
+      },
+      tableRowClassName({row, rowIndex}) {
+        if (rowIndex === 1) {
+          return 'warning-row';
+        } else if (rowIndex === 3) {
+          return 'success-row';
+        }
+        return '';
+      },
+      SELECTALL(){
+        var _this = this;
+        axios({
+          method: "get",
+          url: "http://localhost/question/show",
+        }).then(function (resp) {
+          _this.tableData = resp.data;
+        })
+      },
+      add_img(row)
+      {
+        var _this=this;
+        axios({
+          method:"post",
+          url:"http://localhost/question/keepquestionnumber",
+          data:row
+        }).then(function (resp){
+          if(resp.data=="success"){
+            _this.dialogVisible_addimg=true;
+          }
+        })
+
+      },
+      delete_ques(row){
+        this.$confirm('此操作将永久删除所选题目, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          var _this=this;
+          axios({
+            method:"post",
+            url:"http://localhost/question/delete",
+            data:row
+          }).then(function (resp){
+            if(resp.data=="success"){
+              _this.SELECTALL();
+              _this.$message({
+                message: '删除成功',
+                type: 'success'
+              });
+            }
+          })
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
+          });
+        });
+      },
+      onSubmit(){
+        var _this=this;
+        axios({
+          method:"post",
+          url:"http://localhost/question/addchoose",
+          data:_this.form,
+        }).then(function (resp){
+          if(resp.data=="success"){
+            _this.dialogVisible=false;
+            _this.SELECTALL();
+            _this.$message({
+              message: '添加题目成功',
+              type: 'success'
+            });
+          }
+        })
+      },
+      onSubmit_PD(){
+        var _this=this;
+        axios({
+          method:"post",
+          url:"http://localhost/question/addpd",
+          data:_this.form_PD,
+        }).then(function (resp){
+          if(resp.data=="success"){
+            _this.dialogVisible_PD=false;
+            _this.SELECTALL();
+            _this.$message({
+              message: '添加题目成功',
+              type: 'success'
+            });
+          }
+        })
+      },
+
+    },
+    data(){
+      return{
+        tableData:[],
+        multipleSelection: [],
+        dialogVisible: false,
+        dialogVisible_PD: false,
+        dialogVisible_addimg: false,
+        form: {
+          chapter_number:'',
+          question_title: '',
+          option_a:'',
+          option_b:'',
+          option_c:'',
+          option_d:'',
+          question_answer:'',
+          question_explain:'',
+        },
+        form_PD: {
+          chapter_number:'',
+          question_title: '',
+          question_answer:'',
+          question_explain:'',
+        }
+      }
+    },
+  })
+</script>
+</body>
+</html>

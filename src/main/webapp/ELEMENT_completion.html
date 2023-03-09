@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div id="COMPLE">
+    <el-page-header @back="goBack" content="做题分析">
+    </el-page-header>
+    <br>
+    <el-input style="width: 240px" v-model="input_chapter" placeholder="请输入章节编号"></el-input>
+    <el-input style="width: 240px" v-model="input_class" placeholder="请输入班级编号"></el-input>
+    <el-button @click="SELECT_TWO" type="primary">开始查询</el-button>
+    <template>
+        <el-table
+                :data="tableData"
+                style="width: 100%"
+                :row-class-name="tableRowClassName"
+                @selection-change="handleSelectionChange"
+        >
+            <el-table-column
+                    label="排名"
+                    type="index"
+                    width="50">
+            </el-table-column>
+            <el-table-column
+                    prop="chapter_number"
+                    label="章节编号"
+                    align="center">
+            </el-table-column>
+            <el-table-column
+                    prop="class_number"
+                    label="班级编号"
+                    align="center">
+            </el-table-column>
+            <el-table-column
+                    prop="student_number"
+                    label="学生编号"
+                    align="center">
+            </el-table-column>
+            <el-table-column
+                    prop="student_name"
+                    label="学生姓名"
+                    align="center">
+            </el-table-column>
+            <el-table-column
+                    prop="answer_record"
+                    label="分数"
+                    align="center">
+            </el-table-column>
+        </el-table>
+    </template>
+
+</div>
+<script src="js/axios-0.18.0.js"></script>
+<script src="js/vue.js"></script>
+<script src="element-ui/lib/index.js"></script>
+<link rel="stylesheet" href="element-ui/lib/theme-chalk/index.css">
+<script>
+    new Vue({
+        el:"#COMPLE",
+        mounted(){
+            this.SelectALL();
+        },
+        methods: {
+            goBack() {
+                location.href = "http://localhost/ELEMENT_HOME.html"
+            },
+            SelectALL() {
+                var _this = this;
+                axios({
+                    method: "get",
+                    url: "http://localhost/completion/all",
+                }).then(function (resp) {
+                    _this.tableData = resp.data;
+                })
+            },
+            handleSelectionChange(val) {
+                this.multipleSelection = val;
+            },
+            tableRowClassName({row, rowIndex}) {
+                if (rowIndex === 1) {
+                    return 'warning-row';
+                } else if (rowIndex === 3) {
+                    return 'success-row';
+                }
+                return '';
+            },
+            SELECT_TWO(){
+                this.ONEandTWO.chapter_number=this.input_chapter;
+                this.ONEandTWO.class_number=this.input_class;
+                var _this = this;
+                axios({
+                    method: "post",
+                    url: "http://localhost/completion/two",
+                    data: _this.ONEandTWO,
+                }).then(function (resp) {
+                    _this.tableData = resp.data;
+                })
+            },
+        },
+        data(){
+            return{
+                input_chapter: '',
+                input_class:'',
+                ONEandTWO:{
+                    chapter_number:'',
+                    class_number:'',
+                },
+                tableData:[],
+                multipleSelection: [],
+            }
+        },
+    })
+</script>
+</body>
+</html>

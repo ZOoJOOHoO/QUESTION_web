@@ -1,0 +1,38 @@
+#主要使用yml来进行配置
+spring:
+  profiles:
+    active: dev
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql:///test
+    username: root
+    password: ZJH111
+    type: com.alibaba.druid.pool.DruidDataSource
+  servlet:
+    multipart:
+      max-file-size: 5MB
+
+server:
+  port: 80
+
+mybatis:
+  config-location: classpath:/mybatis-config.xml
+---
+spring:
+  config:
+    activate:
+      on-profile: pro
+server:
+  port: 82
+---
+spring:
+  config:
+    activate:
+      on-profile: test
+server:
+  port: 83

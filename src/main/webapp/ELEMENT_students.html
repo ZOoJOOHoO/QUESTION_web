@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div id="student">
+    <el-page-header @back="goBack" content="学生管理">
+    </el-page-header>
+    <br>
+    <el-input style="width: 180px" @blur="check_myclass" v-model="input_myclassnumber" placeholder="请输入您的班级编号"></el-input>
+    <br>
+    <br>
+    <el-row>
+        <el-button type="danger" @click="deletebatch">批量删除</el-button>
+        <el-button type="primary" @click="dialogVisible = true">添加学生</el-button>
+        <el-button type="success" @click="addstuSSSS">批量导入</el-button>
+    </el-row>
+
+    <template>
+        <el-table
+                :data="tableData"
+                style="width: 100%"
+                :row-class-name="tableRowClassName"
+                @selection-change="handleSelectionChange"
+        >
+            <el-table-column
+                    type="selection"
+                    width="55">
+            </el-table-column>
+            <el-table-column
+                    type="index"
+                    width="50">
+            </el-table-column>
+            <el-table-column
+                    prop="student_number"
+                    label="学号"
+                    align="center">
+            </el-table-column>
+            <el-table-column
+                    prop="student_name"
+                    label="姓名"
+                    align="center">
+            </el-table-column>
+            <el-table-column
+                    prop="class_number"
+                    label="班级号"
+                    align="center">
+            </el-table-column>
+            <el-table-column
+                    align="center"
+                    label="操作">
+                <template slot-scope="scope">
+                    <el-row>
+                        <el-button type="primary" @click="changeinfo(scope.row)">修改</el-button>
+                        <el-button type="danger" @click="delete_stu(scope.row)">删除</el-button>
+                    </el-row>
+                </template>
+            </el-table-column>
+        </el-table>
+    </template>
+    <el-dialog
+            title="添加学生"
+            :visible.sync="dialogVisible"
+            width="30%">
+        <el-form ref="form" :model="student_add" label-width="80px">
+            <el-form-item label="学生学号">
+                <el-input v-model="student_add.student_number"></el-input>
+            </el-form-item>
+            <el-form-item label="学生姓名">
+                <el-input v-model="student_add.student_name"></el-input>
+            </el-form-item>
+            <el-form-item>
+                <el-button type="primary" @click="ADDSTU">立即创建</el-button>
+                <el-button @click="dialogVisible = false">取消</el-button>
+            </el-form-item>
+        </el-form>
+    </el-dialog>
+
+    <el-dialog
+            title="批量导入学生"
+            :visible.sync="addstuSSS"
+            width="30%">
+        <form action="http://localhost/stumanage/addexcel" method="post" enctype="multipart/form-data">
+            <input type="file" name="excel">
+            <input type="submit" value="提交">
+        </form>
+    </el-dialog>
+
+    <el-dialog
+            title="修改信息"
+            :visible.sync="changeinfodialogVisible"
+            width="30%">
+        <el-form ref="form" :model="student_change" label-width="80px">
+            <el-form-item label="学生姓名">
+                <el-input v-model="student_change.student_name"></el-input>
+            </el-form-item>
+            <el-form-item>
+                <el-button type="primary" @click="changesubmit">确定</el-button>
+                <el-button @click="changeinfodialogVisible = false">取消</el-button>
+            </el-form-item>
+        </el-form>
+    </el-dialog>
+
+</div>
+<script src="js/axios-0.18.0.js"></script>
+<script src="js/vue.js"></script>
+<script src="element-ui/lib/index.js"></script>
+<link rel="stylesheet" href="element-ui/lib/theme-chalk/index.css">
+<script>
+    new Vue({
+        el:"#student",
+        mounted(){
+
+        },
+        methods: {
+            goBack() {
+                location.href = "http://localhost/ELEMENT_HOME.html"
+            },
+            handleSelectionChange(val) {
+                this.multipleSelection = val;
+            },
+            tableRowClassName({row, rowIndex}) {
+                if (rowIndex === 1) {
+                    return 'warning-row';
+                } else if (rowIndex === 3) {
+                    return 'success-row';
+                }
+                return '';
+            },
+            SelectMY_classstudents(){
+                var _this=this;
+                axios({
+                    method:"post",
+                    url:"http://localhost/stumanage/showstu",
+                    data:_this.input_myclassnumber
+                }).then(function (resp){
+                    _this.tableData=resp.data;
+                    console.log(resp.data);
+                })
+            },
+            check_myclass() {
+                var _this=this;
+                axios({
+                    method:"post",
+                    url:"http://localhost/stumanage/check_myclass",
+                    data:_this.input_myclassnumber
+                }).then(function (resp){
+                    if(resp.data=="YES")
+                    {
+                        _this.SelectMY_classstudents();
+                    }else{
+                        _this.open();
+                    }
+                })
+
+            },
+            open() {
+                this.$alert('请选择您所管理班级', '这不是您的班级', {
+                    confirmButtonText: '确定',
+                });
+            },
+            ADDSTU(){
+                this.student_add.class_number=this.input_myclassnumber;
+                var _this=this;
+                _this.student_add.class_number=_this.input_myclassnumber
+                axios({
+                    method:"post",
+                    url:"http://localhost/stumanage/add",
+                    data:_this.student_add
+                }).then(function (resp){
+                    if(resp.data=="success"){
+                        _this.dialogVisible=false;
+                        _this.SelectMY_classstudents();
+                        _this.$message({
+                            message: '添加学生成功',
+                            type: 'success'
+                        });
+                    }
+                })
+            },
+            changeinfo(row){
+                this.student_change=row;
+                this.changeinfodialogVisible=true;
+            },
+            changesubmit(){
+                var _this=this;
+                axios({
+                    method:"post",
+                    url:"http://localhost/stumanage/changeinfo",
+                    data:_this.student_change
+                }).then(function (resp){
+                    if(resp.data=="success"){
+                        _this.changeinfodialogVisible=false;
+                        _this.SelectMY_classstudents();
+                        _this.$message({
+                            message: '修改信息成功',
+                            type: 'success'
+                        });
+                    }
+                })
+            },
+            delete_stu(row){
+                this.$confirm('此操作将永久删除所选学生, 是否继续?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    var _this=this;
+                    axios({
+                        method:"post",
+                        url:"http://localhost/stumanage/delete",
+                        data:row
+                    }).then(function (resp){
+                        if(resp.data=="success"){
+                            _this.SelectMY_classstudents();
+                            _this.$message({
+                                message: '删除成功',
+                                type: 'success'
+                            });
+                        }
+                    })
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消删除'
+                    });
+                });
+            },
+            addstuSSSS()
+            {
+                this.addstuSSS=true
+            },
+            deletebatch(){
+                this.$confirm('此操作将永久删除所选学生, 是否继续?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    console.log(this.multipleSelection)
+                    for (let i = 0; i < this.multipleSelection.length; i++) {
+                        let each = this.multipleSelection[i];
+                        this.select_studentnumbers[i] = each.student_number;
+                    }
+                    console.log(this.select_studentnumbers)
+                    var _this=this;
+                    axios({
+                        method:"post",
+                        url:"http://localhost/stumanage/delete_batch",
+                        data:_this.select_studentnumbers
+                    }).then(function (resp){
+                        if(resp.data=="success"){
+                            _this.SelectMY_classstudents();
+                            _this.$message({
+                                message: '删除成功',
+                                type: 'success'
+                            });
+                        }
+                    })
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消删除'
+                    });
+                });
+            },
+        },
+        data(){
+            return {
+                input_myclassnumber: '',
+                tableData: [],
+                multipleSelection: [],
+                select_studentnumbers:[],
+                dialogVisible: false,
+                changeinfodialogVisible:false,
+                addstuSSS:false,
+                student_add: {
+                    student_number: '',
+                    student_name: '',
+                    class_number:''
+                },
+                student_change: {
+                    student_name: '',
+                },
+            }
+        }
+    })
+</script>
+</body>
+</html>

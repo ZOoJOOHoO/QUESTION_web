@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.mappers.Mapper_chapter_completion">
+
+    <select id="SELECT_END" resultType="com.example.demo.pojo.chapter_completion_2">
+        select * from chapter_completion a inner join student_user b
+        on a.student_number = b.student_number
+        WHERE chapter_number=#{chapter_number} and class_number=#{class_number} order by answer_record*1 desc
+    </select>
+</mapper>

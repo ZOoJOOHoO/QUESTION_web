@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>主页</title>
+</head>
+<body>
+<div id="HOME">
+    <el-menu
+            :default-active="activeIndex2"
+            class="el-menu-demo"
+            mode="horizontal"
+            @select="handleSelect"
+            background-color="#545c64"
+            text-color="#fff"
+            active-text-color="#ffd04b">
+        <el-menu-item index="1"><a href="ELEMENT_CLASS.html" target="_self">班级管理</a></el-menu-item>
+        <el-menu-item index="2"><a href="ELEMENT_students.html" target="_self">学生管理</a></el-menu-item>
+        <el-menu-item index="3"><a href="ELEMENT_CHAPTER.html" target="_self">章节管理</a></el-menu-item>
+        <el-menu-item index="4"><a href="ELEMENT_questions.html" target="_self">题库管理</a></el-menu-item>
+        <el-menu-item index="5"><a href="ELEMENT_completion.html" target="_self">做题分析</a></el-menu-item>
+    </el-menu>
+</div>
+<script src="js/axios-0.18.0.js"></script>
+<script src="js/vue.js"></script>
+<script src="element-ui/lib/index.js"></script>
+<link rel="stylesheet" href="element-ui/lib/theme-chalk/index.css">
+<script>
+    new Vue({
+        el:"#HOME",
+        methods: {
+            handleSelect(key, keyPath) {
+                console.log(key, keyPath);
+            },
+        },
+        data() {
+            return {
+                activeIndex2: '1'
+            };
+        },
+    })
+</script>
+</body>
+</html>

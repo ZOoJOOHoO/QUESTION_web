@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div id="ww">
+  <el-page-header @back="goBack" content="班级管理">
+  </el-page-header>
+  <br>
+  <el-row>
+    <el-button type="danger" @click="deletebatch">批量删除</el-button>
+    <el-button type="primary" @click="dialogVisible = true">创建班级</el-button>
+  </el-row>
+
+  <el-dialog
+          title="创建班级"
+          :visible.sync="dialogVisible"
+          width="30%">
+    <el-form ref="form" :model="class_add" label-width="80px">
+      <el-form-item label="班级编号">
+        <el-input v-model="class_add.class_number"></el-input>
+      </el-form-item>
+      <el-form-item label="班级名称">
+        <el-input v-model="class_add.class_name"></el-input>
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" @click="ADDclass">立即创建</el-button>
+        <el-button @click="dialogVisible = false">取消</el-button>
+      </el-form-item>
+    </el-form>
+  </el-dialog>
+
+  <el-dialog
+          title="修改信息"
+          :visible.sync="changedialogVisible"
+          width="30%">
+    <el-form ref="form" :model="class_updata" label-width="80px">
+      <el-form-item label="班级名称">
+        <el-input v-model="class_updata.class_name"></el-input>
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" @click="chagesubmit">确定修改</el-button>
+        <el-button @click="changedialogVisible = false">取消</el-button>
+      </el-form-item>
+    </el-form>
+  </el-dialog>
+
+  <el-dialog
+          title="提示"
+          :visible.sync="deletedialogVisible"
+          width="30%">
+    <span>确认删除所选???</span>
+    <span slot="footer" class="dialog-footer">
+    <el-button @click="deletedialogVisible = false">取 消</el-button>
+    <el-button type="primary" @click="delete_submit">确 定</el-button>
+  </span>
+  </el-dialog>
+
+  <template>
+    <el-table
+            :data="tableData"
+            style="width: 100%"
+            :row-class-name="tableRowClassName"
+            @selection-change="handleSelectionChange"
+    >
+      <el-table-column
+              type="selection"
+              width="55">
+      </el-table-column>
+      <el-table-column
+              type="index"
+              width="50">
+      </el-table-column>
+      <el-table-column
+              prop="class_number"
+              label="班级编号"
+              align="center">
+      </el-table-column>
+      <el-table-column
+              prop="class_name"
+              label="班级名称"
+              align="center">
+      </el-table-column>
+      <el-table-column
+              prop="teacher_number"
+              label="教师编号"
+              align="center">
+      </el-table-column>
+      <el-table-column
+              align="center"
+              label="操作">
+        <template slot-scope="scope">
+        <el-row>
+          <el-button type="primary" @click="change(scope.row)">修改</el-button>
+          <el-button type="danger" @click="delete_BY_classnumber(scope.row)">删除</el-button>
+        </el-row>
+        </template>
+      </el-table-column>
+    </el-table>
+  </template>
+</div>
+<script src="js/axios-0.18.0.js"></script>
+<script src="js/vue.js"></script>
+<script src="element-ui/lib/index.js"></script>
+<link rel="stylesheet" href="element-ui/lib/theme-chalk/index.css">
+<script>
+  new Vue({
+    el:"#ww",
+    mounted(){
+      this.SelectALL();
+    },
+    methods: {
+      goBack() {
+        location.href="http://localhost/ELEMENT_HOME.html"
+      },
+      SelectALL(){
+        var _this=this;
+        axios({
+          method:"get",
+          url:"http://localhost/classmanage/myclass"
+        }).then(function (resp){
+          _this.tableData=resp.data;
+        })
+      },
+      delete_BY_classnumber(row){
+        this.class_add = row;
+        this.deletedialogVisible=true;
+      },
+      change(row){
+        this.class_updata = row;
+        this.changedialogVisible = true;
+      },
+      chagesubmit(){
+        var _this=this;
+        axios({
+          method:"post",
+          url:"http://localhost/classmanage/changeinfo",
+          data:_this.class_updata
+        }).then(function (resp){
+          if(resp.data=="success"){
+            _this.changedialogVisible=false;
+            _this.SelectALL();
+            _this.$message({
+              message: '修改信息成功',
+              type: 'success'
+            });
+          }
+        })
+      },
+      delete_submit(){
+        var _this=this;
+        axios({
+          method:"post",
+          url:"http://localhost/classmanage/delete",
+          data:_this.class_add
+        }).then(function (resp){
+          if(resp.data=="success"){
+            _this.deletedialogVisible=false;
+            _this.SelectALL();
+            _this.$message({
+              message: '删除成功',
+              type: 'success'
+            });
+          }
+        })
+      },
+      tableRowClassName({row, rowIndex}) {
+        if (rowIndex === 1) {
+          return 'warning-row';
+        } else if (rowIndex === 3) {
+          return 'success-row';
+        }
+        return '';
+      },
+      handleSelectionChange(val) {
+        this.multipleSelection = val;
+      },
+      onSubmit() {
+        console.log('submit!');
+      },
+      ADDclass() {
+        var _this=this;
+        axios({
+          method:"post",
+          url:"http://localhost/classmanage/add",
+          data:_this.class_add
+        }).then(function (resp){
+          if(resp.data=="success"){
+            _this.dialogVisible=false;
+            _this.SelectALL();
+            _this.$message({
+              message: '创建班级成功',
+              type: 'success'
+            });
+          }
+        })
+      },
+      deletebatch(){
+          this.$confirm('此操作将永久删除所选班级, 是否继续?', '提示', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+          }).then(() => {
+            console.log(this.multipleSelection)
+            for (let i = 0; i < this.multipleSelection.length; i++) {
+              let each = this.multipleSelection[i];
+              this.select_class_numbers[i] = each.class_number;
+            }
+            console.log(this.select_class_numbers)
+            var _this=this;
+            axios({
+              method:"post",
+              url:"http://localhost/classmanage/deletebatch",
+              data:_this.select_class_numbers
+            }).then(function (resp){
+              if(resp.data=="success"){
+                _this.SelectALL();
+                _this.$message({
+                  message: '删除成功',
+                  type: 'success'
+                });
+              }
+            })
+          }).catch(() => {
+            this.$message({
+              type: 'info',
+              message: '已取消删除'
+            });
+          });
+      }
+    },
+    data() {
+      return {
+        class_add: {
+          class_number: '',
+          class_name: ''
+        },
+        class_updata: {
+          class_number: '',
+          class_name: ''
+        },
+        dialogVisible: false,/*创建数据对话框是否展示*/
+        changedialogVisible: false, /*修改对话框是否显示*/
+        deletedialogVisible: false, /*修改对话框是否显示*/
+        multipleSelection: [],
+        tableData: [],
+        select_class_numbers:[]
+      }
+    }
+  })
+</script>
+</body>
+</html>
