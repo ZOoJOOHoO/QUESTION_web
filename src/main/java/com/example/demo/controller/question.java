@@ -141,12 +141,12 @@ public class question {
     public void oss(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession();
         String questionnumber = (String) session.getAttribute("cur_questionnumber");
-        String url="https://zjhvvvvv.oss-cn-nanjing.aliyuncs.com/springbootimage/"+questionnumber+".jpg";
+        String url="https://*/*/"+questionnumber+".jpg";
 
-        String endpoint = "https://oss-cn-nanjing.aliyuncs.com";
-        String accessKeyId = "LTAI5tNwATB2maGtZaHAmZyq";
-        String accessKeySecret = "SHHpQdN7TRnXg7dlTlAY4IAFHb3Iae";
-        String bucketName = "zjhvvvvv";
+        String endpoint = "*";//为了安全
+        String accessKeyId = "*";//改为自己的
+        String accessKeySecret = "*";
+        String bucketName = "*";
 
         String objectName = "springbootimage/"+questionnumber+".jpg";//保持与题号一致
 
